@@ -4,8 +4,7 @@ const tokenSchema = new mongoose.Schema({
      userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true,
-        unique: true
+        required: true
     },
     jti: {
         type: String,
@@ -15,11 +14,11 @@ const tokenSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true,
+        enum: ['admin', 'director', 'manager']
     },
     sessionId: {
         type: String,
-        required: true, 
-        unique: true
+        required: true
     },
     isUsed: {
         type: Boolean,
@@ -29,7 +28,6 @@ const tokenSchema = new mongoose.Schema({
     token: {
         type: String,
         required: true,
-        unique: true
     },
 }, { timestamps: true } );
 

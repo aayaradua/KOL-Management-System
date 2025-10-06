@@ -5,6 +5,10 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import kolRoute from "./routes/kolRoute.js";
 import managerRoute from "./routes/managerRoute.js";
+import userRoute from "./routes/userRoute.js"
+import authRoute from "./routes/authRoute.js"
+import tokenRoute from "./routes/tokenRoute.js"
+import cookieParser from 'cookie-parser'
 
 connectDB();
 
@@ -13,13 +17,15 @@ const __dirname = path.resolve();
 const app = express();
 const PORT = ENV.PORT || 3000;
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(cors());
 
-// app.use("/api/auth", authRoute);
-// app.use("/api/token", tokenRoute);
-app.use("/api/kol", kolRoute);
-app.use("/api/manager", managerRoute);
+app.use('/api/auth', authRoute);
+app.use('/api/token', tokenRoute);
+app.use('/api/kol', kolRoute);
+app.use('/api/user', userRoute);
+app.use('/api/manager', managerRoute);
 
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

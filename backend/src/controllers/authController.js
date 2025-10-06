@@ -1,34 +1,35 @@
-import { Kol } from "../models/Kol";
-import { User } from "../models/User";
+import { Kol } from "../models/Kol.js";
+import { User } from "../models/User.js";
 import { hashPassword, comparePassword } from "../utils/bcrypt.js";
 import { signAccessToken, signRefreshToken, verifyJwtToken } from "../utils/jwt.js";
 import { v4 as uuid } from 'uuid';
 import { Token } from "../models/Token.js";
-import { generateToken, hashToken } from "crypto";
+import { generateToken, hashToken } from "../utils/crypto.js";
 
-export const loginUser = async(res, req) => {
+export const loginUser = async( req, res) => {
     try {
-         const { email, password } = req.body;
+        const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({error:'Email or password is invalid'});
         }
-        const isMatch = await comparePassword(password, user._id);
+        const isMatch = await comparePassword(password, user.password);
         if (!isMatch) {
             return res.status(400).json({error: 'Email or password is invalid'});
         }
-        const hashedPassword = await hashPassword(password);
-
+        if (user.status === 'disable') {
+            return res.status(403).json({error: 'You are not allowed to login'})
+        }
         const sessionId = uuid();
         const jti = uuid();
 
-        const accessToken = signAccessToken({userid: user._id, role: user.role});
-        const refreshToken = signRefreshToken({userid: user._id, role: user.role, jti, sessionId});
+        const accessToken = signAccessToken({userId: user._id, role: user.role});
+        const refreshToken = signRefreshToken({userId: user._id, role: user.role, jti, sessionId});
 
         const hashedToken = hashToken(refreshToken);
 
         await Token.create({
-            userid: user._id, 
+            userId: user._id, 
             role: user.role, 
             jti, 
             sessionId,

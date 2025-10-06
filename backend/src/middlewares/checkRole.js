@@ -1,17 +1,18 @@
 const checkRole = (...allowedRoles) => {
   try {
     return (req, res, next) => {
+      console.log("request pass through checkrole ");
       const userRole = req.user?.role;
       if (!userRole) {
-        return res.status(401).json({ error: "No user role!" });
+        return res.status(401).json({ error: 'No user role! '});
       }
       if (!allowedRoles.includes(userRole)) {
-        return res.status(403).json({ error: "You are not authorised!" });
+        return res.status(403).json({ error: 'You are not authorised!' });
       }
       next();
     };
   } catch (err) {
-    // return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
 

@@ -36,15 +36,20 @@ const kolSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    isBlook: {
+    isBlocked: {
         type: Boolean,
         default: false
     },
-    posts: [{
-        post: {
-            type:String
+    posts: [
+        {
+            postUrl: String,
+            views: Number,
+            likes: Number,
+            shares: Number,
+            comments: String,
+            remarks: String
         }
-    }],
+    ],
 
 }, { timestamps: true});
 

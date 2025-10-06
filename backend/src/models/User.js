@@ -8,7 +8,6 @@ const userSchema = new mongoose.Schema({
     },
     avatar: {
         type: String,
-        required: true
     },
     role: {
         type: String,
@@ -27,7 +26,7 @@ const userSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['enable', 'disable'],
-        default: 'enable'
+        required: true
     }
     
 }, { timestamps: true});
