@@ -1,7 +1,6 @@
 const checkRole = (...allowedRoles) => {
   try {
     return (req, res, next) => {
-      console.log("request pass through checkrole ");
       const userRole = req.user?.role;
       if (!userRole) {
         return res.status(401).json({ error: 'No user role! '});

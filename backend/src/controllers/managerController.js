@@ -1,19 +1,15 @@
 import { Manager } from '../models/Manager.js';
 
 export const addManager = async(req, res) => {
-    const { name, responsibleRegion, suggestedPrice, creator } = req.body;
+    const { name, regions } = req.body;
+    
     try {
         const manager = await Manager.create({
             name,
-            responsibleRegion: [
-                {
-                    region: responsibleRegion,
-
-                    suggestedPrice: suggestedPrice
-                }
-            ],
-            creator
+            regions,
+            creator: req.user.userId
         });
+
         return res.status(201).json({
             status: 'Success',
             message: 'Manager has been created successfully',
@@ -29,7 +25,7 @@ export const addManager = async(req, res) => {
 
 export const getAllManagers = async(req, res) => {
     try {
-        const managers = await Manager.find().populate('creator', 'name');
+        const managers = await Manager.find().populate('creator', 'username');
         return res.status(200).json({
             status: 'Success',
             message: 'Manager has been created successfully',
@@ -65,8 +61,8 @@ export const viewManagerInfo = async(req, res) => {
 
 export const modifyManager = async(req, res) => {
     const  id = req.params.id;
-    const { responsibleRegion, suggestedPrice } = req.body;
-    const updatedData = { responsibleRegion, suggestedPrice }
+    const { regions } = req.body;
+    const updatedData = regions
 
     try {
         const manager = await Manager.findByIdAndUpdate(id, {updatedData}, {new: true});

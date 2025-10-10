@@ -2,6 +2,7 @@ import { signAccessToken, signRefreshToken, verifyJwtToken } from "../utils/jwt.
 import { Token } from "../models/Token.js";
 import { v4 as uuid } from 'uuid';
 import { generateToken, hashToken } from "../utils/crypto.js";
+import { ENV } from "../config/index.js";
 
 
 export const refreshTokenHandler = async (req, res) => {
@@ -46,14 +47,14 @@ export const refreshTokenHandler = async (req, res) => {
                 
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: ENV.NODE_ENV === 'production',
             sameSite: 'Strict',
             maxAge: 15 * 60 * 1000 
         }); 
         
         res.cookie('refreshToken', newRefreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',  
+            secure: ENV.NODE_ENV === 'production',  
             sameSite: 'Strict',
             maxAge: 7 * 24 * 60 * 60 * 1000 
         });

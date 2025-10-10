@@ -5,7 +5,7 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import kolRoute from "./routes/kolRoute.js";
 import managerRoute from "./routes/managerRoute.js";
-import userRoute from "./routes/userRoute.js"
+import adminRoute from "./routes/adminRoute.js"
 import authRoute from "./routes/authRoute.js"
 import tokenRoute from "./routes/tokenRoute.js"
 import cookieParser from 'cookie-parser'
@@ -24,7 +24,7 @@ app.use(cors());
 app.use('/api/auth', authRoute);
 app.use('/api/token', tokenRoute);
 app.use('/api/kol', kolRoute);
-app.use('/api/user', userRoute);
+app.use('/api/admin', adminRoute);
 app.use('/api/manager', managerRoute);
 
 if (ENV.NODE_ENV === "production") {

@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
-import { User } from "./User.js";
+import { Admin } from "./Admin.js";
 
 const managerSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
     },
-    responsibleRegion: [
+    regions: [
         {
-            region: {
+            responsibleRegion: {
                 type: String,
                 required: true
             },
@@ -20,7 +20,7 @@ const managerSchema = new mongoose.Schema({
     ],
     creator: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user'
+        ref: 'admin'
     }
 
 }, { timestamps: true});
