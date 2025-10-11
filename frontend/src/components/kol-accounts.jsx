@@ -226,82 +226,83 @@ export default function KOLAccounts({ onViewAccount }) {
           <div className="text-sm text-gray-600 mb-4">
             KOL Account List ({filteredAccounts.length})
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead>
+          <div className="overflow-x-auto max-w-[1200px] mx-auto">
+            <table className="w-full text-sm border-collapse table-fixed">
+              <thead className="bg-gray-50 sticky top-0">
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
+                  <th className="w-[60px] py-3 px-4 text-left font-medium text-gray-700">
                     ID
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
+                  <th className="w-[100px] py-3 px-4 text-left font-medium text-gray-700">
                     Country
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
+                  <th className="w-[100px] py-3 px-4 text-left font-medium text-gray-700">
                     Name
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                    X Account
+                  <th className="w-[220px] py-3 px-4 text-left font-medium text-gray-700">
+                    Socials
                   </th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                    Followers
+                  <th className="w-[80px] py-3 px-4 text-right font-medium text-gray-700">
+                    Post ($)
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                    YouTube Account
-                  </th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                    Followers
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                    TikTok Account
-                  </th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                    Followers
-                  </th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                    Post Price ($)
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
+                  <th className="w-[90px] py-3 px-4 text-left font-medium text-gray-700">
                     Inviter
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
-                    Created Time
+                  <th className="w-[140px] py-3 px-4 text-left font-medium text-gray-700 whitespace-nowrap">
+                    Created
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap">
+                  <th className="w-[110px] py-3 px-4 text-left font-medium text-gray-700">
                     Actions
                   </th>
                 </tr>
               </thead>
+
               <tbody>
                 {currentAccounts.map((account) => (
                   <tr
                     key={account.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    className="border-b border-gray-100 hover:bg-gray-50 even:bg-gray-50/30"
                   >
                     <td className="py-3 px-4 text-gray-800">{account.id}</td>
-                    <td className="py-3 px-4 text-gray-800">
+                    <td className="py-3 px-4 text-gray-800 truncate">
                       {account.country}
                     </td>
-                    <td className="py-3 px-4 text-gray-800">{account.name}</td>
-                    <td className="py-3 px-4 text-blue-600">
-                      {account.xAccount}
+                    <td className="py-3 px-4 text-gray-800 truncate">
+                      {account.name}
                     </td>
-                    <td className="py-3 px-4 text-gray-800 text-right">
-                      {account.xFollowers}
+                    <td className="py-3 px-4 text-gray-800">
+                      <div className="space-y-1 text-xs">
+                        <div>
+                          <span className="font-medium text-gray-600">X:</span>{" "}
+                          <span className="text-blue-600">
+                            {account.xAccount}
+                          </span>{" "}
+                          <span className="text-gray-500">
+                            ({account.xFollowers})
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-600">YT:</span>{" "}
+                          <span className="text-blue-600">
+                            {account.ytAccount}
+                          </span>{" "}
+                          <span className="text-gray-500">
+                            ({account.ytFollowers})
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-600">TT:</span>{" "}
+                          <span className="text-blue-600">
+                            {account.ttAccount}
+                          </span>{" "}
+                          <span className="text-gray-500">
+                            ({account.ttFollowers})
+                          </span>
+                        </div>
+                      </div>
                     </td>
-                    <td className="py-3 px-4 text-blue-600">
-                      {account.ytAccount}
-                    </td>
-                    <td className="py-3 px-4 text-gray-800 text-right">
-                      {account.ytFollowers}
-                    </td>
-                    <td className="py-3 px-4 text-blue-600">
-                      {account.ttAccount}
-                    </td>
-                    <td className="py-3 px-4 text-gray-800 text-right">
-                      {account.ttFollowers}
-                    </td>
-                    <td className="py-3 px-4 text-gray-800 text-right">
-                      {account.postPrice}
+                    <td className="py-3 px-4 text-right text-gray-800">
+                      ${account.postPrice}
                     </td>
                     <td className="py-3 px-4 text-gray-800">
                       {account.inviter}
@@ -310,7 +311,7 @@ export default function KOLAccounts({ onViewAccount }) {
                       {account.createdTime}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="flex gap-3 whitespace-nowrap">
+                      <div className="flex gap-2 whitespace-nowrap">
                         <button
                           onClick={() => onViewAccount(account.id)}
                           className="text-blue-600 hover:underline"
