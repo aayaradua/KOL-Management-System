@@ -38,7 +38,7 @@ export default function NewPost() {
   };
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Create New Post</h1>
         <p className="text-gray-500 mt-1">
@@ -112,7 +112,7 @@ export default function NewPost() {
 
             <div className="flex items-center gap-3 pt-4">
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                Schedule Post
+                Create Post
               </Button>
               <Button
                 type="button"

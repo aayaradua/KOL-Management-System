@@ -325,7 +325,7 @@ export default function KOLAccounts({ onViewAccount }) {
                           onClick={() => handleRevoke(account.id)}
                           className="text-gray-400 hover:underline"
                         >
-                          Revoke
+                          Block
                         </button>
                       </div>
                     </td>
