@@ -1,4 +1,7 @@
 import { useState, useMemo } from "react";
+import { allAccounts } from "../constants/allAccounts";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export default function KOLAccounts({ onViewAccount }) {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -8,162 +11,26 @@ export default function KOLAccounts({ onViewAccount }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const allAccounts = [
-    {
-      id: "000004",
-      country: "Japan",
-      name: "Jenny",
-      xAccount: "@jqwEhi",
-      xFollowers: "12134",
-      ytAccount: "@jqwEhi",
-      ytFollowers: "12134",
-      ttAccount: "qwerty",
-      ttFollowers: "27",
-      postPrice: "872",
-      inviter: "Jenny",
-      createdTime: "2025/07/29 10:28:00",
-    },
-    {
-      id: "000003",
-      country: "Asia",
-      name: "Cody",
-      xAccount: "@hjuEw",
-      xFollowers: "1232",
-      ytAccount: "@hjuEw",
-      ytFollowers: "1232",
-      ttAccount: "vhxiu",
-      ttFollowers: "7463",
-      postPrice: "6271",
-      inviter: "Cody",
-      createdTime: "2025/07/29 10:28:00",
-    },
-    {
-      id: "000002",
-      country: "Africa",
-      name: "Bessie",
-      xAccount: "@hjxjsuiF",
-      xFollowers: "4020",
-      ytAccount: "@hjxjsuiF",
-      ytFollowers: "4020",
-      ttAccount: "bxhsiv",
-      ttFollowers: "192",
-      postPrice: "80800",
-      inviter: "Bessie",
-      createdTime: "2025/07/29 10:28:00",
-    },
-    {
-      id: "000001",
-      country: "Hong Kong",
-      name: "Esanu",
-      xAccount: "@iukjh",
-      xFollowers: "7777",
-      ytAccount: "@iukjh",
-      ytFollowers: "7777",
-      ttAccount: "cjdse7",
-      ttFollowers: "36",
-      postPrice: "852",
-      inviter: "Esanu",
-      createdTime: "2025/07/14 10:28:00",
-    },
-    {
-      id: "000005",
-      country: "USA",
-      name: "Michael",
-      xAccount: "@mikeus",
-      xFollowers: "45000",
-      ytAccount: "@mikeus",
-      ytFollowers: "45000",
-      ttAccount: "mikeus",
-      ttFollowers: "3200",
-      postPrice: "1500",
-      inviter: "Admin",
-      createdTime: "2025/07/20 14:30:00",
-    },
-    {
-      id: "000006",
-      country: "UK",
-      name: "Sarah",
-      xAccount: "@sarahuk",
-      xFollowers: "23000",
-      ytAccount: "@sarahuk",
-      ytFollowers: "23000",
-      ttAccount: "sarahuk",
-      ttFollowers: "1800",
-      postPrice: "950",
-      inviter: "Jenny",
-      createdTime: "2025/07/21 09:15:00",
-    },
-    {
-      id: "000007",
-      country: "Canada",
-      name: "David",
-      xAccount: "@davidca",
-      xFollowers: "67000",
-      ytAccount: "@davidca",
-      ytFollowers: "67000",
-      ttAccount: "davidca",
-      ttFollowers: "5400",
-      postPrice: "2200",
-      inviter: "Cody",
-      createdTime: "2025/07/22 11:45:00",
-    },
-    {
-      id: "000008",
-      country: "Australia",
-      name: "Emma",
-      xAccount: "@emmaau",
-      xFollowers: "34000",
-      ytAccount: "@emmaau",
-      ytFollowers: "34000",
-      ttAccount: "emmaau",
-      ttFollowers: "2900",
-      postPrice: "1300",
-      inviter: "Bessie",
-      createdTime: "2025/07/23 16:20:00",
-    },
-    {
-      id: "000009",
-      country: "Germany",
-      name: "Hans",
-      xAccount: "@hansde",
-      xFollowers: "18000",
-      ytAccount: "@hansde",
-      ytFollowers: "18000",
-      ttAccount: "hansde",
-      ttFollowers: "1200",
-      postPrice: "800",
-      inviter: "Admin",
-      createdTime: "2025/07/24 13:10:00",
-    },
-    {
-      id: "000010",
-      country: "France",
-      name: "Marie",
-      xAccount: "@mariefr",
-      xFollowers: "29000",
-      ytAccount: "@mariefr",
-      ytFollowers: "29000",
-      ttAccount: "mariefr",
-      ttFollowers: "2100",
-      postPrice: "1100",
-      inviter: "Jenny",
-      createdTime: "2025/07/25 10:30:00",
-    },
-    {
-      id: "000011",
-      country: "Spain",
-      name: "Carlos",
-      xAccount: "@carloses",
-      xFollowers: "41000",
-      ytAccount: "@carloses",
-      ytFollowers: "41000",
-      ttAccount: "carloses",
-      ttFollowers: "3500",
-      postPrice: "1600",
-      inviter: "Cody",
-      createdTime: "2025/07/26 15:45:00",
-    },
-  ];
+  const getAllKol = async () => {
+    const data = await axios.get("http://localhost:5000/api/kol/all", {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const resData = await data.data;
+
+    console.log("resData", resData);
+
+    return resData;
+  };
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ["kol-list"],
+    queryFn: getAllKol,
+  });
+
+  console.log("data", data);
 
   const filteredAccounts = useMemo(() => {
     if (!searchQuery.trim()) return allAccounts;
