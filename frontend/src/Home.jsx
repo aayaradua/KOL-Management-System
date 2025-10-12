@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "./lib/user-context";
-import Sidebar from "./components/sidebar";
 import Header from "./components/header";
 import KOLAccounts from "./components/kol-accounts";
 import UsersRoles from "./components/users-roles";
 import KOLAccountDetails from "./components/kol-account-details";
 import Blocklist from "./components/blocklist";
+import Sidebar from "./components/sidebar";
+import Profile from "./components/profile";
+import PostHistory from "./components/post-history";
+import NewPost from "./components/new-post";
 
 export default function Home() {
   const { user } = useUser();
@@ -16,10 +19,11 @@ export default function Home() {
 
   useEffect(() => {
     if (user?.role === "KOL") {
-      setCurrentPage("kol-account-details");
-      setSelectedAccountId(user.id);
+      setCurrentPage("profile");
+    } else {
+      setCurrentPage("kol-accounts");
     }
-  }, [user]);
+  }, [user?.role]);
 
   const handleViewAccount = (id) => {
     setSelectedAccountId(id);
@@ -34,8 +38,7 @@ export default function Home() {
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-
-      <div className="flex-1 flex flex-col max-w-[1200px] mx-auto">
+      <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-1 overflow-auto">
           {currentPage === "kol-accounts" && (
@@ -49,6 +52,9 @@ export default function Home() {
           )}
           {currentPage === "blocklist" && <Blocklist />}
           {currentPage === "users-roles" && <UsersRoles />}
+          {currentPage === "profile" && <Profile />}
+          {currentPage === "post-history" && <PostHistory />}
+          {currentPage === "new-post" && <NewPost />}
         </main>
       </div>
     </div>

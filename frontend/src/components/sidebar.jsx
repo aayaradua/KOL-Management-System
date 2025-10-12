@@ -1,6 +1,6 @@
 import { useUser } from "../lib/user-context";
 
-export default function Sidebar({ currentPage, onNavigate }) {
+const Sidebar = ({ currentPage, onNavigate }) => {
   const { user } = useUser();
 
   const allMenuItems = [
@@ -12,8 +12,22 @@ export default function Sidebar({ currentPage, onNavigate }) {
       roles: ["Admin", "Marketing Manager", "Marketing Director"],
     },
     {
-      id: "kol-account-details",
-      label: "My Account",
+      id: "profile",
+      label: "Profile",
+      parent: null,
+      isCategory: false,
+      roles: ["KOL"],
+    },
+    {
+      id: "post-history",
+      label: "Post History",
+      parent: null,
+      isCategory: false,
+      roles: ["KOL"],
+    },
+    {
+      id: "new-post",
+      label: "New Post",
       parent: null,
       isCategory: false,
       roles: ["KOL"],
@@ -89,4 +103,6 @@ export default function Sidebar({ currentPage, onNavigate }) {
       </nav>
     </aside>
   );
-}
+};
+
+export default Sidebar;
