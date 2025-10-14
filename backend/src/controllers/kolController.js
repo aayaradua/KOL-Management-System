@@ -1,11 +1,22 @@
 import { Kol } from "../models/Kol.js"
+import { hashPassword } from "../utils/bcrypt.js";
 
 export const addKol = async(req, res) => {
-    const { country, name, email, xAccount, xFollowers, youtubeAccount, youtubeFollowers, tiktokAccount, tiktokFollowers, 
-        telegramAccount, telegramFollowers, postPrice, inviter } = req.body;
+    const { country, name, email, password,  xAccount, xFollowers, youtubeAccount, youtubeFollowers, tiktokAccount, tiktokFollowers, 
+        telegramAccount, telegramFollowers, postPrice } = req.body;
         try  {
+            const existingKol = await Kol.findOne({ email });
+            if (existingKol) {
+                return res.status(400).json({error: "KOL already exist"});
+            }
+            const hashedPassword = await hashPassword(password);
             const kol = await Kol.create({
-                country, name, email, postPrice, inviter,
+                country, 
+                name, 
+                email, 
+                password: hashedPassword, 
+                inviter: req.user?.userId, 
+                postPrice,
                 socialMedia: [
                     { platform:'x', account: xAccount, followers: xFollowers }, 
                     { platform: 'youtube', account: youtubeAccount, followers: youtubeFollowers }, 
@@ -16,7 +27,6 @@ export const addKol = async(req, res) => {
             return res.status(201).json({
                 status: 'Success',
                 message: 'KOL has been save successfully',
-                data: kol
             });
         } catch (err) {
             res.status(500).json({
@@ -26,22 +36,29 @@ export const addKol = async(req, res) => {
         }
 };
 
-export const viewKolInfo = async(req, res) => {
+export const viewKolData = async(req, res) => {
     const  id = req.params.id
     try {
-        const kol = await Kol.findById(id);
+        const kol= await Kol.findById(id).populate('inviter', 'username role email');
         if (!kol) {
             return res.status(404).json({error: 'KOL not found'});
         }
         return res.status(200).json({
             status: 'Success',
             message: 'KOL info has been fetched successfully',
-            data: kol
+            name: kol.name,
+            email: kol.email,
+            country: kol.country,
+            socialMedia: kol.socialMedia,
+            inviter: kol.inviter,
+            role: kol.role,
+            postPrice: kol.postPrice,
+            posts: kol.posts
         });
     } catch (err) {
         res.status(500).json({ 
             status: 'Failed',
-            message: err.message
+            message: err.message,
         });
     }
 };
@@ -99,11 +116,19 @@ export const deleteKol = async(req, res) => {
 
 export const getAllKols = async(req, res) => {
     try {
-        const allKols = await Kol.find();
+        const allKols = await Kol.find().populate('inviter', 'username role email');
+
+        const cleanKolsData = allKols.map(allKol => ({
+            name: allKol.name,
+            email: allKol.email,
+            country: allKol.country,
+            socialMedia: allKol.socialMedia,
+            inviter: allKol.inviter
+        }));
         return res.status(200).json({
             status: 'Success',
             message: 'All registered KOLs has been fetched successfully',
-            data: allKols
+            kols: cleanKolsData
         });
     }catch (err) {
             res.status(500).json({
@@ -125,7 +150,7 @@ export const allKolPosts = async(req, res) => {
         return res.status(200).json({
             status: 'Success',
             message: 'KOL posts have been fetched successfully',
-            data: posts
+            data: kol?.posts
         });
     } catch (err) {
             res.status(500).json({
@@ -193,6 +218,28 @@ export const unblockKol = async(req, res) => {
         return res.status(200).json({
             status: 'Success',
             message: 'KOL is unblock successfully',
+        });
+    }  catch (err) {
+        res.status(500).json({
+            status: 'Failed',
+            message: err.message
+        });
+    }
+};
+
+export const blockList = async(req, res) => {
+    try {
+        const blockkKols = await Kol.find({ isBlocked: true });
+
+        const cleanBlockKols = blockkKols.map(blockkKol => ({
+            name: blockkKol.name,
+            country: blockkKol.country,
+            email: blockkKol.email
+        }));
+         return res.status(200).json({
+            status: 'Success',
+            message: 'Block list has been fetched successfully',
+            blockedKols: cleanBlockKols
         });
     }  catch (err) {
         res.status(500).json({

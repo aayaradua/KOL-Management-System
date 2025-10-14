@@ -7,7 +7,7 @@ try {
     if (!kol) {
         return res.status(404).json({error: 'KOL not found'});
     }
-    if (kol.isBlokcked === true) {
+    if (kol.isBlocked === true) {
         return res.status(403).json({error: 'Your account has been blocked!'});
     }
     next();

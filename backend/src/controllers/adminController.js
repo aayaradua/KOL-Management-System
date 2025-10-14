@@ -19,8 +19,7 @@ export const addUser = async( req, res) => {
 
         return res.status(201).json({
             status: 'Success',
-            message: 'User has been created successfully',
-            data: user
+            message: 'User has been created successfully'
         });
     } catch (err) {
         res.status(500).json({
@@ -34,10 +33,16 @@ export const getAllUsers = async(req, res) => {
     try {
         const users = await Admin.find();
 
+        const cleanUsers = users.map(user => ({
+            username: user.username,
+            role: user.role,
+            status: user.status  
+        }));
+
         return res.status(200).json({
             status: 'Success',
             message: 'Users fetched successfully',
-            data: users
+            users: cleanUsers  
         });
     } catch (err) {
         res.status(500).json({
@@ -57,7 +62,10 @@ export const viewUserInfo = async(req, res) => {
         return res.status(200).json({
             status: 'Success',
             message: 'User info has been fetched successfully',
-            data: user
+            username: user.username,
+            role: user.role,
+            email: user.email,
+            status: user.status  
         });
     } catch (err) {
         res.status(500).json({ 

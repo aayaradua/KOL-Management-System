@@ -4,7 +4,6 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import kolRoute from "./routes/kolRoute.js";
-import managerRoute from "./routes/managerRoute.js";
 import adminRoute from "./routes/adminRoute.js"
 import authRoute from "./routes/authRoute.js"
 import tokenRoute from "./routes/tokenRoute.js"
@@ -25,7 +24,6 @@ app.use('/api/auth', authRoute);
 app.use('/api/token', tokenRoute);
 app.use('/api/kol', kolRoute);
 app.use('/api/admin', adminRoute);
-app.use('/api/manager', managerRoute);
 
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

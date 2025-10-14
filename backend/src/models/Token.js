@@ -14,7 +14,7 @@ const tokenSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true,
-        enum: ['admin', 'director', 'manager']
+        enum: ['kol', 'admin', 'director', 'manager']
     },
     sessionId: {
         type: String,

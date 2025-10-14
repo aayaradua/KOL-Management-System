@@ -11,7 +11,10 @@ import { ENV } from "../config/index.js";
 export const loginUser = async( req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await Admin.findOne({ email });
+        let user = await Admin.findOne({ email });
+        if (!user) {
+            user = await Kol.findOne({ email });
+        }
         if (!user) {
             return res.status(400).json({error:'Email or password is invalid'});
         }
@@ -55,13 +58,16 @@ export const loginUser = async( req, res) => {
 
         return res.status(200).json({
             status: 'Success',
-            message: 'User login successfully'
+            message: 'User login successfully',
+            id: user.id,
+            email: user.email,  
+            role: user.role,
         });
     
     } catch(err) {
         return res.status(500).json({
             status: 'Failed',
-            message: 'Login failed! Try again.'
+            message: err.message
         });
     }
 };
@@ -90,7 +96,7 @@ export const forgotPassword = async (req, res) => {
 
     try {
         await transporter.sendMail({
-            from: `"KOL Management Sytem" <${ENV.MAIL_FROM}>`,
+            from: `"CreatorX" <${ENV.MAIL_FROM}>`,
             to: email,
             subject: 'Password Reset',
             html: message
