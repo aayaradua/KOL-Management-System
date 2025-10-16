@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import { forgotPassword, loginUser, logoutUser, resetPassword } from "../controllers/authController.js";
 import { loginValidation, forgotPasswordValidation, resetPasswordValidation } from "../validators/authValidator.js";
+import { checkIfBlocked } from "../middlewares/checkIfBlocked.js";
 
 const router = express.Router();
 

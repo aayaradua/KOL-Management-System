@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ref } from "process";
 
 const kolSchema = new mongoose.Schema({
     country: {
@@ -10,6 +11,10 @@ const kolSchema = new mongoose.Schema({
         required: true
     },
     email: {
+        type: String,
+        required: true
+    },
+    password: {
         type: String,
         required: true
     },
@@ -33,8 +38,8 @@ const kolSchema = new mongoose.Schema({
         required: true
     },
     inviter: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'admin'
     },
     isBlocked: {
         type: Boolean,
@@ -50,6 +55,10 @@ const kolSchema = new mongoose.Schema({
             remarks: String
         }
     ],
+    role: {
+        type: String,
+        default: 'kol' 
+    }
 
 }, { timestamps: true});
 
