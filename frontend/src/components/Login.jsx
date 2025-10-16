@@ -33,6 +33,8 @@ export function Logging() {
       email,
       password,
     });
+    console.log("res", res);
+
     return res.data;
   };
 
@@ -40,8 +42,8 @@ export function Logging() {
     mutationFn: handleLogin,
     onSuccess: (data) => {
       console.log("Login successful:", data);
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+      if (data.message.message === "User login successfully") {
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
       navigate("/");
     },

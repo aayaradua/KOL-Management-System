@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix backend\" \"bun dev --cwd frontend\"",
-    "build": "npm install --prefix backend && cd frontend && bun install && bun run build",
-    "start": "cd backend && npm start",
-    "dev:backend": "npm run dev --cwd backend",
-    "dev:frontend": "bun dev --cwd frontend"
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && bun dev",
+    "build": "cd backend && npm install && cd ../frontend && bun install && bun run build",
+    "start": "cd backend && npm start"
   },
   "repository": {
     "type": "git",
@@ -22,9 +22,6 @@
     "url": "https://github.com/aayaradua/KOL-Management-System/issues"
   },
   "homepage": "https://github.com/aayaradua/KOL-Management-System#readme",
-  "dependencies": {
-    "frontend": "^2.0.0-alpha.4"
-  },
   "devDependencies": {
     "concurrently": "^9.2.1"
   }
