@@ -1,3 +1,4 @@
+import { error } from 'console';
 import { Admin } from '../models/Admin.js'
 import { hashPassword } from '../utils/bcrypt.js';
 
@@ -34,6 +35,7 @@ export const getAllUsers = async(req, res) => {
         const users = await Admin.find();
 
         const cleanUsers = users.map(user => ({
+            id: user.id,
             username: user.username,
             role: user.role,
             status: user.status  
@@ -53,7 +55,7 @@ export const getAllUsers = async(req, res) => {
 };
 
 export const viewUserInfo = async(req, res) => {
-    const  id = req.params.id
+    const  id = req.user.userId;
     try {
         const user = await Admin.findById(id);
         if (!user) {
@@ -76,7 +78,7 @@ export const viewUserInfo = async(req, res) => {
 };
 
 export const deleteUser = async(req, res) => {
-    const  id  = req.params.id;
+    const  { id } = req.params;
     try {
         const user = await Admin.findByIdAndDelete(id);
         if (!user) {
@@ -95,7 +97,7 @@ export const deleteUser = async(req, res) => {
 };
 
 export const modifyUser = async(req, res) => {
-    const id = req.params.id;
+    const { id } = req.params;
     const { role, status } = req.body;
     const updatedData = { role, status };
     try {
@@ -106,6 +108,56 @@ export const modifyUser = async(req, res) => {
         return res.status(200).json({
             status: 'Success',
             message: 'User has been modified successfully'
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'Failed', 
+            message: err.message
+        });
+    }
+};
+
+export const disableUser = async(req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await Admin.findById(id);
+        if (!user) {
+            return res.status(404).json({error: 'User not found'});
+        }
+        if (user.status === 'disable') {
+            return res.status(400).json({error: `User already disbled`});
+        }
+
+        const updatedUser = await Admin.updateOne({ _id: id }, { $set: { status: 'disable' }}, { new: true })
+       
+        return res.status(200).json({
+            status: 'Success',
+            message: 'User status has been disabled successfully'
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'Failed', 
+            message: err.message
+        });
+    }
+};
+
+
+export const enableUser = async(req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await Admin.findById(id);
+        if (!user) {
+            return res.status(404).json({error: 'User not found'});
+        }
+        if (user.status === 'enable') {
+            return res.status(400).json({error: `User already enabled`});
+        }
+        const updatedUser = await Admin.updateOne({ _id: id }, { $set: { status: 'enable' }}, { new: true })
+       
+        return res.status(200).json({
+            status: 'Success',
+            message: 'User status has been enabled successfully'
         });
     } catch (err) {
         res.status(500).json({

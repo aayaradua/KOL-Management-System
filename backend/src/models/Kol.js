@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 import { ref } from "process";
 
 const kolSchema = new mongoose.Schema({
@@ -45,6 +46,8 @@ const kolSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    blockedReason: String,
+    blockedDate: Date,
     posts: [
         {
             postUrl: String,

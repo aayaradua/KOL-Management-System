@@ -62,6 +62,7 @@ export const loginUser = async( req, res) => {
             id: user.id,
             email: user.email,  
             role: user.role,
+            isBlocked: user.isBlocked
         });
     
     } catch(err) {
