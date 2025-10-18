@@ -37,7 +37,26 @@ export const addKolValidator = [
   validateRequest
 ];
 
-export const modifyKolValidator = [
+export const modifyKolPostValidator = [
+  param('id')
+    .isMongoId().withMessage('Invalid KOL ID'),
+
+  body('xAccount').optional().isString().withMessage('X account must be a string'),
+  body('xFollowers').optional().isNumeric().withMessage('X followers must be a number'),
+
+  body('youtubeAccount').optional().isString().withMessage('YouTube account must be a string'),
+  body('youtubeFollowers').optional().isNumeric().withMessage('YouTube followers must be a number'),
+
+  body('tiktokAccount').optional().isString().withMessage('TikTok account must be a string'),
+  body('tiktokFollowers').optional().isNumeric().withMessage('TikTok followers must be a number'),
+
+  body('telegramAccount').optional().isString().withMessage('Telegram account must be a string'),
+  body('telegramFollowers').optional().isNumeric().withMessage('Telegram followers must be a number'),
+
+  validateRequest
+];
+
+export const modifyKolDataValidator = [
   param('id')
     .isMongoId().withMessage('Invalid KOL ID'),
 
@@ -65,17 +84,14 @@ export const modifyKolValidator = [
 ];
 
 export const addPostValidator = [
-  param('id')
-    .isMongoId().withMessage('Invalid KOL ID'),
-
   body('postUrl')
-    .notEmpty().withMessage('Post URL is required')
-    .isString().withMessage('Post URL must be a string'),
+  .notEmpty().withMessage('Post URL is required')
+  .isString().withMessage('Post URL must be a string'),
 
   body('views').optional().isNumeric().withMessage('Views must be a number'),
   body('likes').optional().isNumeric().withMessage('Likes must be a number'),
   body('shares').optional().isNumeric().withMessage('Shares must be a number'),
-  body('comments').optional().isNumeric().withMessage('Comments must be a number'),
+  body('comments').optional().isString().withMessage('Comments must be a string'),
 
   body('remarks').optional().isString().withMessage('Remarks must be a string'),
 

@@ -1,11 +1,7 @@
 import { Kol } from "../models/Kol.js";
 import { Admin } from "../models/Admin.js";
 import { hashPassword, comparePassword } from "../utils/bcrypt.js";
-import {
-  signAccessToken,
-  signRefreshToken,
-  verifyJwtToken,
-} from "../utils/jwt.js";
+import { signAccessToken, signRefreshToken } from "../utils/jwt.js";
 import { v4 as uuid } from "uuid";
 import { Token } from "../models/Token.js";
 import { generateToken, hashToken } from "../utils/crypto.js";
@@ -71,6 +67,7 @@ export const loginUser = async (req, res) => {
       id: user.id,
       email: user.email,
       role: user.role,
+      isBlocked: user.isBlocked,
     });
   } catch (err) {
     return res.status(500).json({

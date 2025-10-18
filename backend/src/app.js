@@ -14,11 +14,14 @@ connectDB();
 const __dirname = path.resolve();
 
 const app = express();
-const PORT = ENV.PORT || 3000;
+const PORT = ENV.PORT 
 
+app.use(cors({
+  origin: '*',
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors());
 
 app.use('/api/auth', authRoute);
 app.use('/api/token', tokenRoute);
