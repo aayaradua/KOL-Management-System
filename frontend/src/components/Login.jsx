@@ -10,12 +10,14 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import api from "../hooks/axios";
+import { useUser } from "../lib/user-context";
 
 export function Logging() {
   const navigate = useNavigate();
+  const { setUser: setAuthUser } = useUser();
 
   const [user, setUser] = useState({
     email: "",
@@ -29,11 +31,7 @@ export function Logging() {
 
   const handleLogin = async ({ email, password }) => {
     if (!email || !password) throw new Error("Email and password required");
-    const res = await axios.post("http://localhost:5000/api/auth/login", {
-      email,
-      password,
-    });
-    console.log("res", res);
+    const res = await api.post("/auth/login", { email, password });
 
     return res.data;
   };
@@ -42,10 +40,12 @@ export function Logging() {
     mutationFn: handleLogin,
     onSuccess: (data) => {
       console.log("Login successful:", data);
-      if (data.message.message === "User login successfully") {
-        localStorage.setItem("user", JSON.stringify(data.user));
+      setAuthUser(data);
+      if (data.role !== "kol") {
+        navigate("/kol");
+      } else {
+        navigate("/profile");
       }
-      navigate("/");
     },
     onError: (err) => {
       console.error("Login failed:", err);

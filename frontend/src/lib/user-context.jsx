@@ -1,32 +1,50 @@
-"use client";
-
-import { createContext, useContext, useState } from "react";
-
-// interface User {
-//   id: string;
-//   username: string;
-//   role: "KOL" | "Marketing Manager" | "Marketing Director" | "Admin";
-// }
-
-// interface UserContextType {
-//   user: User | null;
-//   setUser: (user: User | null) => void;
-// }
+import { createContext, useContext, useState, useEffect } from "react";
 
 const UserContext = createContext(undefined);
 
-export function UserProvider({ children }) {
-  const [user, setUser] = useState({
-    id: "000002",
-    username: "sky",
-    role: "KOL",
+export const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
   });
+
+  console.log("user", user);
+
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "user") {
+        try {
+          const newUser = e.newValue ? JSON.parse(e.newValue) : null;
+          setUser(newUser);
+        } catch {
+          setUser(null);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const updateUser = (newUser) => {
+    setUser(newUser);
+    if (newUser) {
+      localStorage.setItem("user", JSON.stringify(newUser));
+    } else {
+      localStorage.removeItem("user");
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser: updateUser }}>
       {children}
     </UserContext.Provider>
   );
-}
+};
 
 export function useUser() {
   const context = useContext(UserContext);

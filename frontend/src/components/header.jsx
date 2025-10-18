@@ -1,76 +1,40 @@
 import { useUser } from "../lib/user-context";
 
-import { useState } from "react";
-
 export default function Header() {
-  const { user, setUser } = useUser();
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-
-  const availableRoles = [
-    "Admin",
-    "Marketing Manager",
-    "Marketing Director",
-    "KOL",
-  ];
-
-  const handleRoleChange = (role) => {
-    if (user) {
-      setUser({ ...user, role });
-    }
-    setShowRoleDropdown(false);
-  };
+  const { user } = useUser();
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-end gap-4">
       <div className="flex items-center gap-2">
         <img
-          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${
-            user?.username || "Admin"
-          }`}
-          alt="User"
+          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.user_name}`}
+          alt={`User-${user?.user_name}`}
           className="w-8 h-8 rounded-full"
         />
         <span className="text-sm text-gray-700">
-          {user?.username || "Guest"}
+          {user?.user_name || "Guest"}
         </span>
         {user && (
           <div className="relative">
             <button
-              onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center gap-1"
+              className={`text-xs px-2 py-0.5 rounded flex items-center gap-1
+        ${(() => {
+          switch (user.role?.toLowerCase()) {
+            case "admin":
+              return "bg-indigo-100 text-indigo-700 hover:bg-indigo-200";
+            case "marketing manager":
+              return "bg-green-100 text-green-700 hover:bg-green-200";
+            case "marketing director":
+              return "bg-purple-100 text-purple-700 hover:bg-purple-200";
+            case "kol":
+              return "bg-blue-100 text-blue-700 hover:bg-blue-200";
+            default:
+              return "bg-gray-100 text-gray-700 hover:bg-gray-200";
+          }
+        })()}`}
             >
-              {user?.role || "Guest"}
-              <svg
-                className="w-3 h-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              {user.role}
             </button>
-            {showRoleDropdown && (
-              <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-50 min-w-[160px]">
-                {availableRoles.map((role) => (
-                  <button
-                    key={role}
-                    onClick={() => handleRoleChange(role)}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
-                      user.role === role
-                        ? "bg-blue-50 text-blue-700"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    {role}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         )}
       </div>

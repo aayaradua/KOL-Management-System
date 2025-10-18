@@ -1,12 +1,34 @@
+import { useNavigate } from "react-router";
 import { useUser } from "../lib/user-context";
 
-const Sidebar = ({ currentPage, onNavigate }) => {
-  const { user } = useUser();
+import { useLocation } from "react-router";
+import api from "../hooks/axios";
+import { useMutation } from "@tanstack/react-query";
+
+const Sidebar = () => {
+  const { user, setUser } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await api.post("/auth/logout");
+    },
+    onSuccess: () => {
+      localStorage.removeItem("user");
+      setUser(null);
+      navigate("/login");
+    },
+    onError: (error) => {
+      console.error("Logout failed:", error);
+    },
+  });
 
   const allMenuItems = [
     {
       id: "kol-accounts",
       label: "KOL Accounts",
+      path: "/kol",
       parent: null,
       isCategory: false,
       roles: ["Admin", "Marketing Manager", "Marketing Director"],
@@ -14,6 +36,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
     {
       id: "profile",
       label: "Profile",
+      path: "/profile",
       parent: null,
       isCategory: false,
       roles: ["KOL"],
@@ -21,6 +44,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
     {
       id: "post-history",
       label: "Post History",
+      path: "/post-history",
       parent: null,
       isCategory: false,
       roles: ["KOL"],
@@ -28,6 +52,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
     {
       id: "new-post",
       label: "New Post",
+      path: "/new-post",
       parent: null,
       isCategory: false,
       roles: ["KOL"],
@@ -35,6 +60,7 @@ const Sidebar = ({ currentPage, onNavigate }) => {
     {
       id: "blocklist",
       label: "Blocklist",
+      path: "/blocklist",
       parent: null,
       isCategory: false,
       roles: ["Admin", "Marketing Manager", "Marketing Director"],
@@ -48,19 +74,34 @@ const Sidebar = ({ currentPage, onNavigate }) => {
     },
     {
       id: "users-roles",
-      label: "Users Roles",
+      label: "Roles",
+      path: "/roles",
       parent: "system",
       isCategory: false,
       roles: ["Admin", "Marketing Manager", "Marketing Director", "KOL"],
     },
   ];
 
-  const menuItems = allMenuItems.filter(
-    (item) => !user || item.roles.includes(user.role)
+  // ✅ If user is not logged in, don’t show sidebar
+  if (!user) return null;
+
+  const menuItems = allMenuItems.filter((item) =>
+    item.roles
+      .map((role) => role.toLowerCase())
+      .includes(user.role?.toLowerCase())
   );
 
+  const handleNavigate = (path) => {
+    if (path) navigate(path);
+  };
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   return (
-    <aside className="w-64 bg-gray-800 text-white flex flex-col">
+    <aside className="w-64 bg-gray-900 text-white flex flex-col min-h-screen">
+      {/* Header */}
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
@@ -75,23 +116,25 @@ const Sidebar = ({ currentPage, onNavigate }) => {
           <span className="font-semibold text-lg">CreatorX</span>
         </div>
       </div>
+
+      {/* Menu */}
       <nav className="flex-1 p-4">
         <ul className="space-y-1">
           {menuItems.map((item) => (
             <li key={item.id}>
               {item.isCategory ? (
-                <div className="px-3 py-2 text-sm text-gray-400 font-medium">
+                <div className="px-3 py-2 text-xs uppercase tracking-wide text-gray-400 font-medium mt-4">
                   {item.label}
                 </div>
               ) : (
                 <button
-                  onClick={() => onNavigate(item.id)}
-                  className={`w-full text-left px-3 py-2 rounded text-sm ${
+                  onClick={() => handleNavigate(item.path)}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors duration-150 ${
                     item.parent ? "pl-8" : ""
                   } ${
-                    currentPage === item.id
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-300 hover:bg-gray-700"
+                    location.pathname === item.path
+                      ? "bg-blue-600 text-white font-medium"
+                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
                   }`}
                 >
                   {item.label}
@@ -101,6 +144,21 @@ const Sidebar = ({ currentPage, onNavigate }) => {
           ))}
         </ul>
       </nav>
+
+      {/* Logout Button */}
+      <div className="p-4 border-t border-gray-700">
+        <button
+          onClick={handleLogout}
+          disabled={logoutMutation.isPending}
+          className={`w-full text-sm py-2 px-4 rounded-md transition-colors ${
+            logoutMutation.isPending
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-red-600 hover:bg-red-700 text-white"
+          }`}
+        >
+          {logoutMutation.isPending ? "Logging out..." : "Logout"}
+        </button>
+      </div>
     </aside>
   );
 };

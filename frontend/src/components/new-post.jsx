@@ -12,121 +12,193 @@ import {
   SelectValue,
 } from "./ui/select";
 
+import { useMutation } from "@tanstack/react-query";
+
+import api from "../hooks/axios";
+import { Input } from "./ui/input";
+import { useNavigate } from "react-router";
+
 export default function NewPost() {
   const { user } = useUser();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+
+  // form fields
   const [platform, setPlatform] = useState("");
+  const [postUrl, setPostUrl] = useState("");
   const [content, setContent] = useState("");
-  const [scheduledDate, setScheduledDate] = useState("");
-  const [scheduledTime, setScheduledTime] = useState("");
+  const [views, setViews] = useState("");
+  const [likes, setLikes] = useState("");
+  const [shares, setShares] = useState("");
+  const [comments, setComments] = useState("");
+  const [remarks, setRemarks] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: async (payload) => {
+      const { data } = await api.post("/posts/add-post", payload);
+      return data;
+    },
+    onSuccess: () => {
+      // toast.success("Post created successfully!");
+      navigate("/posts");
+    },
+    onError: (error) => {
+      console.error(error);
+      // toast.error("Failed to create post. Please try again.");
+    },
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("[v0] New post submitted:", {
+
+    const payload = {
+      postUrl,
       platform,
+      views: Number(views) || 0,
+      likes: Number(likes) || 0,
+      shares: Number(shares) || 0,
+      comments,
+      remarks,
       content,
-      scheduledDate,
-      scheduledTime,
-      userId: user?.id,
-    });
-    // In real app, this would call an API
-    alert("Post created successfully!");
-    // Reset form
-    setPlatform("");
-    setContent("");
-    setScheduledDate("");
-    setScheduledTime("");
+    };
+
+    mutation.mutate(payload);
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-3xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Create New Post</h1>
-        <p className="text-gray-500 mt-1">
-          Schedule a new post for your social media platforms
-        </p>
+        <p className="text-gray-500 mt-1">Add a new post to your dashboard</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Post Details</CardTitle>
+          <CardTitle>
+            {step === 1 ? "Post Information" : "Post Metrics & Remarks"}
+          </CardTitle>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="platform">Platform</Label>
-              <Select value={platform} onValueChange={setPlatform} required>
-                <SelectTrigger id="platform">
-                  <SelectValue placeholder="Select a platform" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="instagram">📷 Instagram</SelectItem>
-                  <SelectItem value="twitter">🐦 Twitter</SelectItem>
-                  <SelectItem value="facebook">👥 Facebook</SelectItem>
-                  <SelectItem value="linkedin">💼 LinkedIn</SelectItem>
-                  <SelectItem value="tiktok">🎵 TikTok</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {step === 1 ? (
+              <>
+                {/* Step 1: Basic Info */}
+                <div className="space-y-2">
+                  <Label htmlFor="platform">Platform</Label>
+                  <Select value={platform} onValueChange={setPlatform} required>
+                    <SelectTrigger id="platform">
+                      <SelectValue placeholder="Select a platform" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="instagram">📷 Instagram</SelectItem>
+                      <SelectItem value="twitter">🐦 Twitter</SelectItem>
+                      <SelectItem value="facebook">👥 Facebook</SelectItem>
+                      <SelectItem value="linkedin">💼 LinkedIn</SelectItem>
+                      <SelectItem value="tiktok">🎵 TikTok</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
-              <Textarea
-                id="content"
-                placeholder="Write your post content here..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                rows={6}
-                className="resize-none"
-              />
-              <p className="text-sm text-gray-500">
-                {content.length} characters
-              </p>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="postUrl">Post URL</Label>
+                  <Input
+                    id="postUrl"
+                    placeholder="Enter post URL"
+                    value={postUrl}
+                    onChange={(e) => setPostUrl(e.target.value)}
+                    required
+                  />
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="date">Scheduled Date</Label>
-                <input
-                  type="date"
-                  id="date"
-                  value={scheduledDate}
-                  onChange={(e) => setScheduledDate(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="content">Content</Label>
+                  <Textarea
+                    id="content"
+                    placeholder="Write your post content..."
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    required
+                    rows={5}
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="time">Scheduled Time</Label>
-                <input
-                  type="time"
-                  id="time"
-                  value={scheduledTime}
-                  onChange={(e) => setScheduledTime(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
+                <div className="flex justify-end pt-4">
+                  <Button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Next
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Step 2: Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="views">Views</Label>
+                    <Input
+                      id="views"
+                      type="number"
+                      value={views}
+                      onChange={(e) => setViews(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="likes">Likes</Label>
+                    <Input
+                      id="likes"
+                      type="number"
+                      value={likes}
+                      onChange={(e) => setLikes(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="shares">Shares</Label>
+                    <Input
+                      id="shares"
+                      type="number"
+                      value={shares}
+                      onChange={(e) => setShares(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="comments">Comments</Label>
+                    <Input
+                      id="comments"
+                      value={comments}
+                      onChange={(e) => setComments(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-            <div className="flex items-center gap-3 pt-4">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                Create Post
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setContent("");
-                  setPlatform("");
-                  setScheduledDate("");
-                  setScheduledTime("");
-                }}
-              >
-                Clear
-              </Button>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="remarks">Remarks</Label>
+                  <Textarea
+                    id="remarks"
+                    placeholder="Optional remarks"
+                    value={remarks}
+                    onChange={(e) => setRemarks(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex justify-between pt-4">
+                  <Button variant="outline" onClick={() => setStep(1)}>
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-green-600 hover:bg-green-700"
+                    disabled={mutation.isPending}
+                  >
+                    {mutation.isPending ? "Creating..." : "Create Post"}
+                  </Button>
+                </div>
+              </>
+            )}
           </form>
         </CardContent>
       </Card>

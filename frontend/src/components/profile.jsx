@@ -6,10 +6,26 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-// import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import api from "../hooks/axios";
+import { Badge } from "lucide-react";
 
 export default function Profile() {
   const { user } = useUser();
+
+  const { data, isLoading, isPending } = useQuery({
+    queryKey: ["kol-profile", user?.id],
+    queryFn: async () => {
+      const res = await api.get(`/kol/view/${user?.id}`, {
+        withCredentials: true,
+      });
+      return res.data;
+    },
+    enabled: !!user.id,
+  });
+
+  console.log("data", { data, user });
+  console.log("data", data);
 
   if (!user) {
     return (
@@ -19,6 +35,9 @@ export default function Profile() {
     );
   }
 
+  if (isLoading || isPending) {
+    return <h1>Loading.....</h1>;
+  }
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Profile</h1>
@@ -31,10 +50,10 @@ export default function Profile() {
           <div className="flex items-start gap-6">
             <Avatar className="w-24 h-24">
               <AvatarImage
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${data?.name}`}
               />
               <AvatarFallback>
-                {user.username.slice(0, 2).toUpperCase()}
+                {data?.name?.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
@@ -44,7 +63,7 @@ export default function Profile() {
                   Username
                 </label>
                 <p className="text-lg font-semibold text-gray-900">
-                  {user.username}
+                  {data?.name}
                 </p>
               </div>
 
@@ -52,14 +71,14 @@ export default function Profile() {
                 <label className="text-sm font-medium text-gray-500">
                   User ID
                 </label>
-                <p className="text-gray-900">{user.id}</p>
+                <p className="text-gray-900">{data.id}</p>
               </div>
 
               <div>
                 <label className="text-sm font-medium text-gray-500">
                   Email
                 </label>
-                <p className="text-gray-900">{user.email || "Not provided"}</p>
+                <p className="text-gray-900">{data.email || "Not provided"}</p>
               </div>
 
               <div>
@@ -67,7 +86,8 @@ export default function Profile() {
                   Role
                 </label>
                 <div className="mt-1">
-                  {/* <Badge variant="secondary">{user.role}</Badge> */}
+                  <p>{data.role}</p>
+                  {/* <Badge variant="secondary">{data.role}</Badge> */}
                 </div>
               </div>
 

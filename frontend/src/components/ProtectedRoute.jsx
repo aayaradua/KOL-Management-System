@@ -1,9 +1,14 @@
 import { Navigate } from "react-router";
+import { useUser } from "../lib/user-context";
 
 export function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("user");
+  const { user } = useUser();
 
-  if (!token) {
+  if (user === undefined) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 

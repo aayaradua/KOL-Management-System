@@ -4,29 +4,32 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import kolRoute from "./routes/kolRoute.js";
-import adminRoute from "./routes/adminRoute.js"
-import authRoute from "./routes/authRoute.js"
-import tokenRoute from "./routes/tokenRoute.js"
-import cookieParser from 'cookie-parser'
+import adminRoute from "./routes/adminRoute.js";
+import authRoute from "./routes/authRoute.js";
+import tokenRoute from "./routes/tokenRoute.js";
+import cookieParser from "cookie-parser";
 
 connectDB();
 
 const __dirname = path.resolve();
 
 const app = express();
-const PORT = ENV.PORT 
+const PORT = ENV.PORT;
 
-app.use(cors({
-  origin: '*',
-  credentials: true
-}));
 app.use(cookieParser());
 app.use(express.json());
 
-app.use('/api/auth', authRoute);
-app.use('/api/token', tokenRoute);
-app.use('/api/kol', kolRoute);
-app.use('/api/admin', adminRoute);
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
+
+app.use("/api/auth", authRoute);
+app.use("/api/token", tokenRoute);
+app.use("/api/kol", kolRoute);
+app.use("/api/admin", adminRoute);
 
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

@@ -46,19 +46,20 @@ export const loginUser = async (req, res) => {
       token: hashedToken,
       isUsed: false,
     });
-
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 15 * 60 * 1000,
+      secure: false,
+      sameSite: "Lax",
+      maxAge: 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: ENV.NODE_ENV === "production",
-      sameSite: "Strict",
+      secure: false,
+      sameSite: "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
     return res.status(200).json({
@@ -66,6 +67,7 @@ export const loginUser = async (req, res) => {
       message: "User login successfully",
       id: user.id,
       email: user.email,
+      user_name: user.username,
       role: user.role,
       isBlocked: user.isBlocked,
     });
