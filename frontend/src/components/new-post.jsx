@@ -40,7 +40,7 @@ export default function NewPost() {
     },
     onSuccess: () => {
       // toast.success("Post created successfully!");
-      navigate("/posts");
+      navigate("/post-history");
     },
     onError: (error) => {
       console.error(error);
@@ -53,13 +53,11 @@ export default function NewPost() {
 
     const payload = {
       postUrl,
-      platform,
-      views: Number(views) || 0,
-      likes: Number(likes) || 0,
-      shares: Number(shares) || 0,
+      views: String(views) || "",
+      likes: String(likes) || "",
+      shares: String(shares) || "",
       comments,
       remarks,
-      content,
     };
 
     mutation.mutate(payload);

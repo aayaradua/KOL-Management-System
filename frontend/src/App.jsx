@@ -9,6 +9,7 @@ import Blocklist from "./components/blocklist";
 import UsersRoles from "./components/users-roles";
 import Profile from "./components/profile";
 import NewPost from "./components/new-post";
+import PostHistory from "./components/post-history";
 
 export default function App() {
   return (
@@ -71,6 +72,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <NewPost />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/post-history"
+            element={
+              <ProtectedRoute>
+                <PostHistory />
               </ProtectedRoute>
             }
           />
