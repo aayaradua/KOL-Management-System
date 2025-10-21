@@ -35,7 +35,7 @@ export default function NewPost() {
 
   const mutation = useMutation({
     mutationFn: async (payload) => {
-      const { data } = await api.post("/posts/add-post", payload);
+      const { data } = await api.post("/kol/add-post", payload);
       return data;
     },
     onSuccess: () => {

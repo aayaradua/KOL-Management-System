@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import fs from 'fs'
-import path from 'path';
+ccccc
 
 const privateKey = fs.readFileSync(path.join("src/keys", "private.key"), 'utf8');
 const publicKey = fs.readFileSync(path.join("src/keys", "public.key"), 'utf8');
