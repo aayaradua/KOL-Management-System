@@ -21,6 +21,7 @@ export default function UsersRoles() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [createdUser, setCreatedUser] = useState(null);
+  const [copied, setCopied] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -87,6 +88,7 @@ export default function UsersRoles() {
       toast.success("User created successfully!");
       setCreatedUser({
         username: variables.username,
+        email: variables.email,
         password: variables.password,
       });
       setShowAddModal(false);
@@ -124,7 +126,6 @@ export default function UsersRoles() {
     },
   });
 
-  // ✅ handleAddUser function (for button use)
   const handleAddUser = () => {
     if (!newUser.username || !newUser.email || !newUser.password) {
       toast.error("Please fill all required fields");
@@ -147,6 +148,15 @@ export default function UsersRoles() {
       status: selectedUser.status.trim().toLowerCase(),
     };
     editUserMutation.mutate({ id: selectedUser.id, updates });
+  };
+
+  const handleCopy = () => {
+    if (!createdUser) return;
+    const details = `Username: ${createdUser.username}\nEmail: ${createdUser.email}\nPassword: ${createdUser.password}`;
+    navigator.clipboard.writeText(details);
+    toast.success("User details copied!");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const isCurrentUser = (userItem) => {
@@ -263,73 +273,51 @@ export default function UsersRoles() {
         </div>
       </div>
 
+      {/* ✅ Add User Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
           </DialogHeader>
-
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Username
-              </label>
-              <Input
-                placeholder="Enter username"
-                value={newUser.username}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, username: e.target.value })
-                }
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">Email</label>
-              <Input
-                placeholder="Enter email"
-                value={newUser.email}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, email: e.target.value })
-                }
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Password
-              </label>
-              <Input
-                type="password"
-                placeholder="Enter password"
-                value={newUser.password}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, password: e.target.value })
-                }
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">Role</label>
-              <Select
-                value={newUser.role}
-                onValueChange={(value) =>
-                  setNewUser({ ...newUser, role: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {role}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Input
+              placeholder="Username"
+              value={newUser.username}
+              onChange={(e) =>
+                setNewUser({ ...newUser, username: e.target.value })
+              }
+            />
+            <Input
+              placeholder="Email"
+              value={newUser.email}
+              onChange={(e) =>
+                setNewUser({ ...newUser, email: e.target.value })
+              }
+            />
+            <Input
+              type="password"
+              placeholder="Password"
+              value={newUser.password}
+              onChange={(e) =>
+                setNewUser({ ...newUser, password: e.target.value })
+              }
+            />
+            <Select
+              value={newUser.role}
+              onValueChange={(value) => setNewUser({ ...newUser, role: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="outline" onClick={() => setShowAddModal(false)}>
               Cancel
@@ -344,7 +332,31 @@ export default function UsersRoles() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit User Modal */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>User Created Successfully 🎉</DialogTitle>
+          </DialogHeader>
+          {createdUser && (
+            <div className="mt-4 space-y-2">
+              <p>
+                <strong>Username:</strong> {createdUser.username}
+              </p>
+              <p>
+                <strong>Email:</strong> {createdUser.email}
+              </p>
+              <p>
+                <strong>Password:</strong> {createdUser.password}
+              </p>
+
+              <Button className="w-full mt-4" onClick={handleCopy}>
+                {copied ? "Copied ✅" : "Copy Details"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent>
           <DialogHeader>
@@ -352,50 +364,40 @@ export default function UsersRoles() {
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4 mt-4">
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">Role</label>
-                <Select
-                  value={selectedUser.role}
-                  onValueChange={(value) =>
-                    setSelectedUser({ ...selectedUser, role: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">
-                  Status
-                </label>
-                <Select
-                  value={selectedUser.status}
-                  onValueChange={(value) =>
-                    setSelectedUser({ ...selectedUser, status: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {status}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
+              <Select
+                value={selectedUser.role}
+                onValueChange={(value) =>
+                  setSelectedUser({ ...selectedUser, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={selectedUser.status}
+                onValueChange={(value) =>
+                  setSelectedUser({ ...selectedUser, status: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <div className="flex justify-end gap-3 mt-6">
                 <Button
                   variant="outline"
