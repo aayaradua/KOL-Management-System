@@ -208,8 +208,12 @@ export default function UsersRoles() {
                   <th className="py-3 px-2 text-left">Username</th>
                   <th className="py-3 px-2 text-left">Email</th>
                   <th className="py-3 px-2 text-left">Role</th>
-                  <th className="py-3 px-2 text-left">Status</th>
-                  <th className="py-3 px-2 text-left">Actions</th>
+                  {user.role.toLowerCase() !== "kol" && (
+                    <>
+                      <th className="py-3 px-2 text-left">Status</th>
+                      <th className="py-3 px-2 text-left">Actions</th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -236,34 +240,38 @@ export default function UsersRoles() {
                       </td>
                       <td className="py-3 px-2">{userItem?.email}</td>
                       <td className="py-3 px-2">{userItem?.role}</td>
-                      <td
-                        className={`py-3 px-2 ${getStatusColor(
-                          userItem?.status
-                        )}`}
-                      >
-                        {userItem?.status || "—"}
-                      </td>
-                      <td className="py-3 px-2">
-                        <div className="flex gap-2">
-                          <button
-                            className={`text-blue-600 hover:underline ${
-                              isMe ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
-                            onClick={() => {
-                              if (isMe) return;
-                              setSelectedUser({
-                                id: userItem.id,
-                                role: userItem.role,
-                                status: userItem.status,
-                              });
-                              setShowEditModal(true);
-                            }}
-                            disabled={isMe}
-                          >
-                            Edit
-                          </button>
-                        </div>
-                      </td>
+                      {user.role.toLowerCase() !== "kol" && (
+                        <td
+                          className={`py-3 px-2 ${getStatusColor(
+                            userItem?.status
+                          )}`}
+                        >
+                          {userItem?.status || "—"}
+                        </td>
+                      )}
+                      {user.role.toLowerCase() !== "kol" && (
+                        <td className="py-3 px-2">
+                          <div className="flex gap-2">
+                            <button
+                              className={`text-blue-600 hover:underline ${
+                                isMe ? "opacity-50 cursor-not-allowed" : ""
+                              }`}
+                              onClick={() => {
+                                if (isMe) return;
+                                setSelectedUser({
+                                  id: userItem.id,
+                                  role: userItem.role,
+                                  status: userItem.status,
+                                });
+                                setShowEditModal(true);
+                              }}
+                              disabled={isMe}
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}

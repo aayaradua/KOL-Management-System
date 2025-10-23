@@ -1,5 +1,5 @@
 import { Kol } from "../models/Kol.js";
-import { Admin } from "../models/Admin.js";
+import { User } from "../models/Users.js";
 import { hashPassword, comparePassword } from "../utils/bcrypt.js";
 import { signAccessToken, signRefreshToken } from "../utils/jwt.js";
 import { v4 as uuid } from "uuid";
@@ -11,7 +11,7 @@ import { ENV } from "../config/index.js";
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    let user = await Admin.findOne({ email });
+    let user = await User.findOne({ email });
     if (!user) {
       user = await Kol.findOne({ email });
     }
@@ -79,9 +79,51 @@ export const loginUser = async (req, res) => {
   }
 };
 
+export const createUser = async (req, res) => {
+  try {
+    const username = req.body.username?.trim();
+    const role = req.body.role?.trim().toLowerCase();
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
+    const status = req.body.status
+      ? req.body.status.toLowerCase().trim()
+      : "enable";
+
+    const allowedRoles = ["admin", "director", "manager", "kol"];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ error: "Invalid role provided" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exist" });
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    await User.create({
+      username,
+      role,
+      email,
+      password: hashedPassword,
+      status,
+    });
+
+    return res.status(201).json({
+      status: "Success",
+      message: "User has been created successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "Failed",
+      message: err.message,
+    });
+  }
+};
+
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
-  const user = await Admin.findOne({ email });
+  const user = await User.findOne({ email });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -124,7 +166,7 @@ export const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { newPassword } = req.body;
     const hashedToken = hashToken(token);
-    const user = await Admin.findOne({
+    const user = await User.findOne({
       resetPasswordToken: hashedToken,
       resetPasswordTokenExpires: { $gt: Date.now() },
     });
