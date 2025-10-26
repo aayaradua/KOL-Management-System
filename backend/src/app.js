@@ -57,6 +57,10 @@ function checkAuth(req, _, next) {
 
 app.use(checkAuth);
 
+app.get("/", (_, res) => {
+  res.send("✅ Backend is running and responding from Railway!");
+});
+
 app.get("/", (req, res) => {
   if (!req.user) {
     return res.redirect("/login");
