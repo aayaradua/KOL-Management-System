@@ -12,7 +12,7 @@ export default function Header() {
           className="w-8 h-8 rounded-full"
         />
         <span className="text-sm text-gray-700">
-          {user?.user_name || "Guest"}
+          {user?.username || "Guest"}
         </span>
         {user && (
           <div className="relative">
