@@ -1,4 +1,3 @@
-import { Kol } from "../models/Kol.js";
 import { User } from "../models/User.js";
 
 export const getAllUsers = async (_, res) => {
@@ -112,10 +111,8 @@ export const deleteUser = async (req, res) => {
 
 export const blockList = async (_, res) => {
   try {
-    // 🔍 find all users where isBlocked = true
     const blockedUsers = await User.find({ isBlocked: true });
 
-    // 🧹 map the result to only include relevant fields
     const cleanBlockedUsers = blockedUsers.map((user) => ({
       id: user._id,
       name: user.name,
