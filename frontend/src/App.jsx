@@ -77,7 +77,10 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<h1>404 Not Found</h1>} />
+          <Route
+            path="*"
+            element={<h1 className=" text-5xl text-red-400">404 Not Found</h1>}
+          />
         </Routes>
       </div>
     </div>
