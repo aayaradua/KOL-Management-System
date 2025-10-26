@@ -10,7 +10,9 @@ import kolRoute from "./routes/kolRoute.js";
 import authRoute from "./routes/authRoute.js";
 import tokenRoute from "./routes/tokenRoute.js";
 import userRoute from "./routes/userRoute.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 connectDB();
 
 const app = express();
