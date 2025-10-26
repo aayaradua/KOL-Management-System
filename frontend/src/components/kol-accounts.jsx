@@ -1,12 +1,10 @@
 import { useState, useMemo } from "react";
-// import { allAccounts } from "../constants/allAccounts";
 import { useQuery } from "@tanstack/react-query";
 import api from "../hooks/axios";
 import { useNavigate } from "react-router";
 
 const getAllKol = async () => {
   const response = await api.get("/kol/all");
-
   return response.data;
 };
 
@@ -31,13 +29,11 @@ const KOLAccounts = () => {
 
     const query = searchQuery.toLowerCase();
     return Kols.filter(
-      (account) =>
-        account?.id?.toLowerCase().includes(query) ||
-        account?.country?.toLowerCase().includes(query) ||
-        account?.name?.toLowerCase().includes(query) ||
-        account?.socialMedia?.some((sm) =>
-          sm.platform?.toLowerCase().includes(query)
-        )
+      (kol) =>
+        kol._id?.toLowerCase().includes(query) ||
+        kol.username?.toLowerCase().includes(query) ||
+        kol.email?.toLowerCase().includes(query) ||
+        kol.status?.toLowerCase().includes(query)
     );
   }, [searchQuery, Kols]);
 
@@ -51,60 +47,54 @@ const KOLAccounts = () => {
   if (isPending) return <p>Loading...</p>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold mb-4">KOL Accounts</h1>
+    <div className="p-4 sm:p-6">
+      <h1 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
+        KOL Accounts
+      </h1>
 
-      <div className="flex gap-3 mb-6">
+      {/* Search */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search by name, email, or status..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border px-3 py-2 rounded flex-1"
+          className="border px-3 py-2 rounded flex-1 text-sm sm:text-base"
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border">
-          <thead className="bg-gray-50">
+      {/* Table for large screens */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full text-sm sm:text-base border border-gray-200 rounded-lg overflow-hidden">
+          <thead className="bg-gray-100 text-gray-700">
             <tr>
               <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Country</th>
-              <th className="p-3 text-left">Socials</th>
-              <th className="p-3 text-right">Post ($)</th>
-              <th className="p-3 text-left">Inviter</th>
-              <th className="p-3 text-left">Created</th>
+              <th className="p-3 text-left">Username</th>
+              <th className="p-3 text-left">Role</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Status</th>
             </tr>
           </thead>
 
           <tbody>
-            {currentAccounts.map((account) => (
+            {currentAccounts.map((kol) => (
               <tr
-                key={account.id}
-                onClick={() => router(`/kol/${account.id}`)}
-                className="border-t hover:bg-gray-100 cursor-pointer transition-colors"
+                key={kol._id}
+                onClick={() => router(`/kol/${kol._id}`)}
+                className="border-t hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 <td className="p-3 font-mono text-gray-700">
-                  {account.id.slice(0, 10)}...
+                  {kol._id.slice(0, 10)}...
                 </td>
-                <td className="p-3">{account.name}</td>
-                <td className="p-3">{account.country}</td>
-                <td className="p-3">
-                  {account.socialMedia?.map((sm) => (
-                    <div key={sm._id} className="text-xs">
-                      <strong>{sm.platform?.toUpperCase()}:</strong>{" "}
-                      {sm.account || "—"}{" "}
-                      {sm.followers && (
-                        <span className="text-gray-500">({sm.followers})</span>
-                      )}
-                    </div>
-                  ))}
-                </td>
-                <td className="p-3 text-right">${account.postPrice}</td>
-                <td className="p-3">{account.inviter?.username || "—"}</td>
-                <td className="p-3">
-                  {new Date(account.created).toLocaleDateString()}
+                <td className="p-3">{kol.username}</td>
+                <td className="p-3 capitalize">{kol.role}</td>
+                <td className="p-3">{kol.email}</td>
+                <td
+                  className={`p-3 font-semibold ${
+                    kol.status === "enable" ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {kol.status}
                 </td>
               </tr>
             ))}
@@ -112,13 +102,54 @@ const KOLAccounts = () => {
         </table>
       </div>
 
+      {/* Card layout for small screens */}
+      <div className="grid md:hidden gap-4">
+        {currentAccounts.map((kol) => (
+          <div
+            key={kol._id}
+            onClick={() => router(`/kol/${kol._id}`)}
+            className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
+          >
+            <div className="flex justify-between text-sm text-gray-500 mb-1">
+              <span>ID:</span>
+              <span className="font-mono text-gray-700">
+                {kol._id.slice(0, 10)}...
+              </span>
+            </div>
+            <div className="flex justify-between text-sm sm:text-base">
+              <span>Username:</span>
+              <span className="font-medium">{kol.username}</span>
+            </div>
+            <div className="flex justify-between text-sm sm:text-base">
+              <span>Role:</span>
+              <span className="capitalize">{kol.role}</span>
+            </div>
+            <div className="flex justify-between text-sm sm:text-base">
+              <span>Email:</span>
+              <span>{kol.email}</span>
+            </div>
+            <div className="flex justify-between text-sm sm:text-base">
+              <span>Status:</span>
+              <span
+                className={`font-semibold ${
+                  kol.status === "enable" ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {kol.status}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
       {filteredAccounts.length > itemsPerPage && (
-        <div className="mt-4 flex justify-center gap-2">
+        <div className="mt-6 flex justify-center flex-wrap gap-2">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-3 py-1 rounded ${
+              className={`px-3 py-1 rounded text-sm sm:text-base transition-colors ${
                 currentPage === page
                   ? "bg-blue-600 text-white"
                   : "bg-gray-100 hover:bg-gray-200"

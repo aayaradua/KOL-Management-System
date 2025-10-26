@@ -8,23 +8,79 @@ import { generateToken, hashToken } from "../utils/crypto.js";
 import { transporter } from "../utils/nodemailer.js";
 import { ENV } from "../config/index.js";
 
+export const createUser = async (req, res) => {
+  try {
+    const username = req.body.username?.trim();
+    const role = req.body.role?.trim().toLowerCase();
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password;
+    const status = req.body.status
+      ? req.body.status.toLowerCase().trim()
+      : "enable";
+
+    const allowedRoles = ["admin", "director", "marketing-manager", "kol"];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ error: "Invalid role provided" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exist" });
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    await User.create({
+      username,
+      role,
+      email,
+      password: hashedPassword,
+      status,
+    });
+
+    return res.status(201).json({
+      status: "Success",
+      message: "User has been created successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "Failed",
+      message: err.message,
+    });
+  }
+};
+
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = await Kol.findOne({ email });
-    }
+
+    let user = await User.findOne({ email }).populate("otherInfo");
     if (!user) {
       return res.status(400).json({ error: "Email or password is invalid" });
     }
+
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Email or password is invalid" });
     }
+
     if (user.status === "disable") {
       return res.status(403).json({ error: "You are not allowed to login" });
     }
+
+    if (user.role === "kol" && !user.otherInfo) {
+      return res.status(403).json({
+        status: "Onboarding Required",
+        message:
+          "Please complete your onboarding information before logging in.",
+        requireOnboarding: true,
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+      });
+    }
+
     const sessionId = uuid();
     const jti = uuid();
 
@@ -67,11 +123,12 @@ export const loginUser = async (req, res) => {
       message: "User login successfully",
       id: user.id,
       email: user.email,
-      user_name: user.username,
+      username: user.username,
       role: user.role,
       isBlocked: user.isBlocked,
     });
   } catch (err) {
+    console.error("Login error:", err);
     return res.status(500).json({
       status: "Failed",
       message: err.message,
@@ -79,44 +136,68 @@ export const loginUser = async (req, res) => {
   }
 };
 
-export const createUser = async (req, res) => {
+export const onboarding = async (req, res) => {
   try {
-    const username = req.body.username?.trim();
-    const role = req.body.role?.trim().toLowerCase();
-    const email = req.body.email?.trim().toLowerCase();
-    const password = req.body.password;
-    const status = req.body.status
-      ? req.body.status.toLowerCase().trim()
-      : "enable";
+    const { email, password, name, country, postPrice, socialMedia, inviter } =
+      req.body;
 
-    const allowedRoles = ["admin", "director", "marketing-manager", "kol"];
-    if (!allowedRoles.includes(role)) {
-      return res.status(400).json({ error: "Invalid role provided" });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: "Failed",
+        message: "User not found. Please register first.",
+      });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: "User already exist" });
+    const validPassword = await comparePassword(password, user.password);
+
+    if (!validPassword) {
+      return res.status(401).json({
+        status: "Failed",
+        message: "Invalid credentials. Please check your password.",
+      });
     }
 
-    const hashedPassword = await hashPassword(password);
+    let kol = await Kol.findOne({ _id: user.otherInfo });
 
-    await User.create({
-      username,
-      role,
-      email,
-      password: hashedPassword,
-      status,
-    });
+    if (!kol) {
+      kol = new Kol({
+        name,
+        country,
+        postPrice,
+        socialMedia,
+        inviter: inviter || null,
+      });
+      await kol.save();
 
-    return res.status(201).json({
+      user.otherInfo = kol._id;
+      user.role = "kol";
+      await user.save();
+    } else {
+      kol.name = name;
+      kol.country = country;
+      kol.postPrice = postPrice;
+      kol.socialMedia = socialMedia;
+      kol.inviter = inviter || kol.inviter;
+      await kol.save();
+    }
+
+    return res.status(200).json({
       status: "Success",
-      message: "User has been created successfully",
+      message: "KOL onboarding completed successfully.",
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        otherInfo: kol,
+      },
     });
   } catch (err) {
+    console.error("Onboarding error:", err);
     res.status(500).json({
       status: "Failed",
-      message: err.message,
+      message: "Server error during onboarding.",
+      error: err.message,
     });
   }
 };

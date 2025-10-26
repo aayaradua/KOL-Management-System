@@ -19,7 +19,6 @@ import { Input } from "./ui/input";
 import { useNavigate } from "react-router";
 
 export default function NewPost() {
-  const { user } = useUser();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
@@ -35,11 +34,10 @@ export default function NewPost() {
 
   const mutation = useMutation({
     mutationFn: async (payload) => {
-      const { data } = await api.post("/kol/add-post", payload);
+      const { data } = await api.post("/kol/create-post", payload);
       return data;
     },
     onSuccess: () => {
-      // toast.success("Post created successfully!");
       navigate("/post-history");
     },
     onError: (error) => {

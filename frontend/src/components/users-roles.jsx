@@ -54,32 +54,47 @@ export default function UsersRoles() {
   const { data } = useQuery({
     queryKey: ["all-users"],
     queryFn: async () => {
-      const res = await api.get(`/admin`, { withCredentials: true });
+      const res = await api.get(`user/all`, { withCredentials: true });
       return res.data;
     },
   });
 
   const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) return data?.users || [];
+    if (!data?.users) return [];
+
+    const currentRole = user?.role?.toLowerCase();
+
+    let usersList = data.users;
+
+    if (currentRole === "kol") {
+      usersList = usersList.filter((u) => {
+        const role = u.role?.toLowerCase();
+        const isSelf =
+          u?.email?.toLowerCase() === user?.email?.toLowerCase() ||
+          u?.username?.toLowerCase() === user?.username?.toLowerCase();
+
+        return isSelf || role === "director" || role === "marketing-manager";
+      });
+    }
+
+    if (!searchQuery.trim()) return usersList;
     const query = searchQuery.toLowerCase();
-    return (
-      data?.users?.filter(
-        (u) =>
-          u?.id?.toLowerCase().includes(query) ||
-          u?.username?.toLowerCase().includes(query) ||
-          u?.role?.toLowerCase().includes(query) ||
-          u?.status?.toLowerCase().includes(query)
-      ) || []
+
+    return usersList.filter(
+      (u) =>
+        u?.id?.toLowerCase().includes(query) ||
+        u?.username?.toLowerCase().includes(query) ||
+        u?.role?.toLowerCase().includes(query) ||
+        u?.status?.toLowerCase().includes(query)
     );
-  }, [searchQuery, data]);
+  }, [searchQuery, data, user]);
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const handleSearch = () => setCurrentPage(1);
 
-  // ✅ Create user mutation
   const createUserMutation = useMutation({
     mutationFn: async (payload) => {
-      const res = await api.post("/admin/create-user", payload, {
+      const res = await api.post("auth/create-user", payload, {
         withCredentials: true,
       });
       return res.data;
@@ -110,11 +125,12 @@ export default function UsersRoles() {
   // ✅ Edit user mutation
   const editUserMutation = useMutation({
     mutationFn: async ({ id, updates }) => {
-      const res = await api.patch(`/admin/${id}`, updates, {
+      const res = await api.patch(`user/${id}`, updates, {
         withCredentials: true,
       });
       return res.data;
     },
+
     onSuccess: () => {
       toast.success("User updated successfully!");
       setShowEditModal(false);
@@ -199,10 +215,11 @@ export default function UsersRoles() {
           <div className="text-sm text-gray-600 mb-3">
             Users ({filteredUsers?.length || 0})
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          {/* Responsive Table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="py-3 px-2 text-left">User ID</th>
                   <th className="py-3 px-2 text-left">Avatar</th>
                   <th className="py-3 px-2 text-left">Username</th>
@@ -220,7 +237,10 @@ export default function UsersRoles() {
                 {filteredUsers.map((userItem) => {
                   const isMe = isCurrentUser(userItem);
                   return (
-                    <tr key={userItem?.id} className="border-b border-gray-100">
+                    <tr
+                      key={userItem?.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition"
+                    >
                       <td className="py-3 px-2">
                         {userItem?.id?.slice(0, 10) || "—"}
                       </td>
@@ -241,36 +261,36 @@ export default function UsersRoles() {
                       <td className="py-3 px-2">{userItem?.email}</td>
                       <td className="py-3 px-2">{userItem?.role}</td>
                       {user.role.toLowerCase() !== "kol" && (
-                        <td
-                          className={`py-3 px-2 ${getStatusColor(
-                            userItem?.status
-                          )}`}
-                        >
-                          {userItem?.status || "—"}
-                        </td>
-                      )}
-                      {user.role.toLowerCase() !== "kol" && (
-                        <td className="py-3 px-2">
-                          <div className="flex gap-2">
-                            <button
-                              className={`text-blue-600 hover:underline ${
-                                isMe ? "opacity-50 cursor-not-allowed" : ""
-                              }`}
-                              onClick={() => {
-                                if (isMe) return;
-                                setSelectedUser({
-                                  id: userItem.id,
-                                  role: userItem.role,
-                                  status: userItem.status,
-                                });
-                                setShowEditModal(true);
-                              }}
-                              disabled={isMe}
-                            >
-                              Edit
-                            </button>
-                          </div>
-                        </td>
+                        <>
+                          <td
+                            className={`py-3 px-2 ${getStatusColor(
+                              userItem?.status
+                            )}`}
+                          >
+                            {userItem?.status || "—"}
+                          </td>
+                          <td className="py-3 px-2">
+                            <div className="flex gap-2">
+                              <button
+                                className={`text-blue-600 hover:underline ${
+                                  isMe ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
+                                onClick={() => {
+                                  if (isMe) return;
+                                  setSelectedUser({
+                                    id: userItem.id,
+                                    role: userItem.role,
+                                    status: userItem.status,
+                                  });
+                                  setShowEditModal(true);
+                                }}
+                                disabled={isMe}
+                              >
+                                Edit
+                              </button>
+                            </div>
+                          </td>
+                        </>
                       )}
                     </tr>
                   );
@@ -278,10 +298,80 @@ export default function UsersRoles() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {filteredUsers.map((userItem) => {
+              const isMe = isCurrentUser(userItem);
+              return (
+                <div
+                  key={userItem?.id}
+                  className="border rounded-lg p-4 bg-white shadow-sm"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <img
+                      src={
+                        userItem?.avatar ||
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${userItem?.username}`
+                      }
+                      alt={userItem?.username}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div>
+                      <p className="font-medium text-gray-800">
+                        {userItem?.username}{" "}
+                        {isMe && (
+                          <span className="text-blue-600 text-sm">(Me)</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-gray-500">{userItem?.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-sm space-y-1">
+                    <p>
+                      <span className="font-medium text-gray-600">Role:</span>{" "}
+                      {userItem?.role}
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-600">Status:</span>{" "}
+                      <span className={getStatusColor(userItem?.status)}>
+                        {userItem?.status || "—"}
+                      </span>
+                    </p>
+                    <p className="text-gray-500 text-xs">
+                      ID: {userItem?.id?.slice(0, 10)}...
+                    </p>
+                  </div>
+
+                  {user.role.toLowerCase() !== "kol" && (
+                    <div className="mt-3">
+                      <button
+                        className={`text-blue-600 hover:underline text-sm ${
+                          isMe ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={() => {
+                          if (isMe) return;
+                          setSelectedUser({
+                            id: userItem.id,
+                            role: userItem.role,
+                            status: userItem.status,
+                          });
+                          setShowEditModal(true);
+                        }}
+                        disabled={isMe}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* ✅ Add User Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent>
           <DialogHeader>

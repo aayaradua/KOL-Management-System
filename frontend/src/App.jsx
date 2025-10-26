@@ -1,6 +1,6 @@
 import Home from "./Home";
 import { Route, Routes } from "react-router";
-import { Logging } from "./components/Login";
+
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import KOLAccountDetails from "./components/kol-account-details";
 import KOLAccounts from "./components/kol-accounts";
@@ -10,22 +10,19 @@ import UsersRoles from "./components/users-roles";
 import Profile from "./components/profile";
 import NewPost from "./components/new-post";
 import PostHistory from "./components/post-history";
+import Logging from "./components/Login";
+import KolOnboarding from "./components/Onboading";
+import Header from "./components/header";
 
 export default function App() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 bg-gray-50 p-6 overflow-auto">
+        <Header />
         <Routes>
           <Route path="/login" element={<Logging />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/onboarding" element={<KolOnboarding />} />
           <Route
             path="/kol"
             element={

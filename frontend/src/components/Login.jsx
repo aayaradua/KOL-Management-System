@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
+import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
+import { useUser } from "../lib/user-context";
+import api from "../hooks/axios";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
 } from "./ui/card";
-import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router";
-import api from "../hooks/axios";
-import { useUser } from "../lib/user-context";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
-export function Logging() {
+const Logging = () => {
   const navigate = useNavigate();
   const { setUser: setAuthUser } = useUser();
 
@@ -32,7 +32,6 @@ export function Logging() {
   const handleLogin = async ({ email, password }) => {
     if (!email || !password) throw new Error("Email and password required");
     const res = await api.post("/auth/login", { email, password });
-
     return res.data;
   };
 
@@ -40,15 +39,38 @@ export function Logging() {
     mutationFn: handleLogin,
     onSuccess: (data) => {
       console.log("Login successful:", data);
-      setAuthUser(data);
-      if (data.role !== "kol") {
-        navigate("/kol");
-      } else {
-        navigate("/profile");
+
+      if (data?.requireOnboarding) {
+        setAuthUser({
+          id: data.id,
+          email: data.email,
+          username: data.username,
+          role: data.role,
+        });
+        navigate("/onboarding");
+        return;
       }
+
+      setAuthUser(data);
+      if (data.role !== "kol") navigate("/kol");
+      else navigate("/profile");
     },
     onError: (err) => {
       console.error("Login failed:", err);
+
+      if (err?.response?.status === 403 || err?.response?.requireOnboarding) {
+        const data = err.response.data;
+        if (data?.requireOnboarding) {
+          setAuthUser({
+            id: data.id,
+            email: data.email,
+            username: data.username,
+            role: data.role,
+          });
+          navigate("/onboarding");
+          return;
+        }
+      }
     },
   });
 
@@ -58,61 +80,72 @@ export function Logging() {
   };
 
   return (
-    <section className="mx-auto flex items-center justify-center h-svh">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
+    <section className="min-h-svh flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl shadow-md rounded-2xl">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-xl sm:text-2xl md:text-3xl font-semibold">
+            Login to your account
+          </CardTitle>
+          <CardDescription className="text-sm sm:text-base text-muted-foreground">
             Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
-          <CardContent>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={user.email}
-                  placeholder="m@example.com"
-                  required
-                  onChange={handleUserDetails}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  name="password"
-                  value={user.password}
-                  onChange={handleUserDetails}
-                  required
-                />
-              </div>
-
-              {isError && (
-                <p className="text-sm text-red-500">{error.message}</p>
-              )}
+          <CardContent className="flex flex-col gap-6 sm:gap-8 md:gap-10">
+            {/* Email */}
+            <div className="grid gap-2">
+              <Label htmlFor="email" className="text-sm sm:text-base">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                value={user.email}
+                placeholder="m@example.com"
+                required
+                onChange={handleUserDetails}
+                className="text-sm sm:text-base"
+              />
             </div>
+
+            {/* Password */}
+            <div className="grid gap-2">
+              <div className="flex items-center flex-wrap justify-between gap-2">
+                <Label htmlFor="password" className="text-sm sm:text-base">
+                  Password
+                </Label>
+                <a
+                  href="#"
+                  className="text-xs sm:text-sm text-primary underline-offset-4 hover:underline"
+                >
+                  Forgot your password?
+                </a>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                value={user.password}
+                onChange={handleUserDetails}
+                required
+                className="text-sm sm:text-base"
+              />
+            </div>
+
+            {/* Error message */}
+            {isError && (
+              <p className="text-sm text-red-500 text-center">
+                {error?.response?.data?.message || error.message}
+              </p>
+            )}
           </CardContent>
 
-          <CardFooter className="flex-col gap-2 mt-10">
+          <CardFooter className="flex-col gap-3 mt-6 sm:mt-8 md:mt-10">
             <Button
               type="submit"
-              className="w-full cursor-pointer"
+              className="w-full text-sm sm:text-base py-2 sm:py-3 cursor-pointer"
               disabled={isPending}
             >
               {isPending ? "Loading..." : "Login"}
@@ -122,4 +155,6 @@ export function Logging() {
       </Card>
     </section>
   );
-}
+};
+
+export default Logging;

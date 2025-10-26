@@ -1,10 +1,11 @@
-import express, { Router } from "express";
+import express from "express";
 import {
   forgotPassword,
   loginUser,
   logoutUser,
   resetPassword,
   createUser,
+  onboarding,
 } from "../controllers/authController.js";
 import {
   loginValidation,
@@ -12,39 +13,16 @@ import {
   resetPasswordValidation,
   addUserValidation,
 } from "../validators/authValidator.js";
-import { checkIfBlocked } from "../middlewares/checkIfBlocked.js";
 import { verifyToken } from "../middlewares/userAuth.js";
-import checkRole from "../middlewares/checkRole.js";
 
 const router = express.Router();
 
-router.post("/login",
-  loginValidation, 
-  loginUser
-);
+router
+  .post("/login", loginValidation, loginUser)
+  .post("/create-user", verifyToken, addUserValidation, createUser)
+  .post("/onboarding", onboarding)
+  .post("/forget", forgotPasswordValidation, forgotPassword)
+  .post("/reset/:token", resetPasswordValidation, resetPassword)
+  .post("/logout", logoutUser);
 
-router.post(
-  "/create-user",
-  verifyToken,
-  
-  addUserValidation,
-  createUser
-);
-
-router.post(
-  "/forget", 
-  forgotPasswordValidation, 
-  forgotPassword
-);
-
-router.post(
-  "/reset/:token", 
-  resetPasswordValidation, 
-  resetPassword
-);
-
-router.post(
-  "/logout", 
-  logoutUser
-);
 export default router;

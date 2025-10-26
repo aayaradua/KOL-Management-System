@@ -1,39 +1,57 @@
 import express from "express";
 import checkRole from "../middlewares/checkRole.js";
 import {
-  onboardInfo,
-  postsHistory,
   createNewPost,
+  deletePost,
+  getAllKol,
+  getKolById,
+  getKolPostsHistory,
+  UpdatePost,
 } from "../controllers/kolController.js";
 import { verifyToken } from "../middlewares/userAuth.js";
-import { 
-  addPostValidation, 
-  onboardValidation, 
-  kolIdValidation
-} from "../validators/kolValidator.js";
+import { addPostValidation } from "../validators/kolValidator.js";
+import {
+  modifyKolPostValidation,
+  userValidation,
+} from "../validators/usersValidator.js";
 
 const router = express.Router();
 
-router.post("/onboard",
-  verifyToken,
-  checkRole("kol"),
-  onboardValidation,
-  onboardInfo
-);
+router
+  .get(
+    "/all",
+    verifyToken,
+    checkRole("admin", "director", "marketing-manager"),
+    getAllKol
+  )
+  .get("/post", verifyToken, checkRole("kol"), getKolPostsHistory)
 
-router.get(
-  "/posts", 
-  verifyToken, 
-  checkRole("kol"), 
-  postsHistory
-);
-
-router.post(
-  "/add-post",
-  verifyToken,
-  checkRole("kol", "admin"),
-  addPostValidation,
-  createNewPost
-);
+  .get(
+    "/:kolId",
+    verifyToken,
+    checkRole("admin", "director", "marketing-manager"),
+    getKolById
+  )
+  .post(
+    "/create-post",
+    verifyToken,
+    checkRole("kol", "admin"),
+    addPostValidation,
+    createNewPost
+  )
+  .patch(
+    "/:id/posts/:postId",
+    verifyToken,
+    checkRole("admin", "director", "marketing-manager"),
+    modifyKolPostValidation,
+    UpdatePost
+  )
+  .delete(
+    "/:id/posts/:postId",
+    verifyToken,
+    checkRole("admin"),
+    userValidation,
+    deletePost
+  );
 
 export default router;

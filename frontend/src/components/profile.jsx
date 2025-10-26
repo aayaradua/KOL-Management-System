@@ -16,16 +16,13 @@ export default function Profile() {
   const { data, isLoading, isPending } = useQuery({
     queryKey: ["kol-profile", user?.id],
     queryFn: async () => {
-      const res = await api.get(`/kol/view/${user?.id}`, {
+      const res = await api.get(`/user/${user?.id}`, {
         withCredentials: true,
       });
       return res.data;
     },
     enabled: !!user.id,
   });
-
-  console.log("data", { data, user });
-  console.log("data", data);
 
   if (!user) {
     return (

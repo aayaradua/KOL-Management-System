@@ -71,23 +71,12 @@ export default function PostHistory() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
-      const res = await api.get(`kol/posts`, { withCredentials: true });
+      const res = await api.get(`/kol/post`, {
+        withCredentials: true,
+      });
       return res.data;
     },
   });
-
-  // const { data, isSuccess } = useQuery({
-  //   mutationFn: async (payload) => {
-  //     const res = await api.get(`/posts`, {
-  //       withCredentials: true,
-  //     });
-
-  //     return res.data;
-  //   },
-  //   onSuccess: (data) => {
-  //     console.log("data", data);
-  //   },
-  // });
 
   if (isLoading) {
     return <h1>Loadin....</h1>;

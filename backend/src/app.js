@@ -7,7 +7,7 @@ import kolRoute from "./routes/kolRoute.js";
 import authRoute from "./routes/authRoute.js";
 import tokenRoute from "./routes/tokenRoute.js";
 import cookieParser from "cookie-parser";
-import userRoute from "./routes/userRoute.js"
+import userRoute from "./routes/userRoute.js";
 
 connectDB();
 
@@ -28,8 +28,8 @@ app.use(
 
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
-app.use("/api/token", tokenRoute);
 app.use("/api/kol", kolRoute);
+app.use("/api/token", tokenRoute);
 
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

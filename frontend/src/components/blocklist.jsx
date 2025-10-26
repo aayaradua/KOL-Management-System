@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const getAllBlockList = async () => {
-  const response = await api.get("/kol/block-list");
+  const response = await api.get("/user/block-list");
 
   return response.data;
 };
