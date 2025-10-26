@@ -1,6 +1,4 @@
-import Home from "./Home";
 import { Route, Routes } from "react-router";
-
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import KOLAccountDetails from "./components/kol-account-details";
 import KOLAccounts from "./components/kol-accounts";
@@ -55,7 +53,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/profile"
             element={
@@ -72,7 +69,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/post-history"
             element={
@@ -81,6 +77,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>
       </div>
     </div>
