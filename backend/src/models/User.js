@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { Kol } from "./Kol.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -26,10 +27,14 @@ const userSchema = new mongoose.Schema(
       enum: ["enable", "disable"],
       required: true,
     },
+    otherInfo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "kol"
+    },
     resetPasswordToken: String,
     resetPasswordTokenExpires: Date,
   },
   { timestamps: true }
 );
 
-export const User = mongoose.model("User", userSchema);
+export const User = mongoose.model("user", userSchema);

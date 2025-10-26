@@ -12,7 +12,6 @@ export const loginValidation = [
     validateRequest
 ];
 
-
 export const forgotPasswordValidation = [
   body('email')
     .notEmpty().withMessage('Email is required')
@@ -30,4 +29,29 @@ export const resetPasswordValidation = [
     .exists().withMessage('Id is required'),
 
     validateRequest
+];
+
+export const addUserValidation = [
+  body("username").notEmpty().withMessage("Username is required"),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters"),
+
+  body("role")
+    .trim()
+    .toLowerCase()
+    .isIn(["admin", "marketing-manager", "director", "kol"])
+    .withMessage("Invalid role specified"),
+
+  body("status")
+    .optional()
+    .trim()
+    .toLowerCase()
+    .isIn(["enable", "disable"])
+    .withMessage("Status must be enable or disable"),
+
+  validateRequest,
 ];

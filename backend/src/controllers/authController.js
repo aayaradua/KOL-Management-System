@@ -1,5 +1,5 @@
 import { Kol } from "../models/Kol.js";
-import { User } from "../models/Users.js";
+import { User } from "../models/User.js";
 import { hashPassword, comparePassword } from "../utils/bcrypt.js";
 import { signAccessToken, signRefreshToken } from "../utils/jwt.js";
 import { v4 as uuid } from "uuid";
@@ -89,7 +89,7 @@ export const createUser = async (req, res) => {
       ? req.body.status.toLowerCase().trim()
       : "enable";
 
-    const allowedRoles = ["admin", "director", "manager", "kol"];
+    const allowedRoles = ["admin", "director", "marketing-manager", "kol"];
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ error: "Invalid role provided" });
     }
